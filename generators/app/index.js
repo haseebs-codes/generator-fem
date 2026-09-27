@@ -196,10 +196,10 @@ loadData();
     if (this.fs.exists(indexPath)) {
       let html = this.fs.read(indexPath);
 
-      if (!html.includes("assets/styles/css/main.css")) {
+      if (!html.includes("assets/styles/css/index.css")) {
         html = html.replace(
           "</head>",
-          '  <link rel="stylesheet" href="assets/styles/css/main.css">\n</head>',
+          '  <link rel="stylesheet" href="assets/styles/css/index.css">\n</head>',
         );
       }
 
