@@ -109,6 +109,26 @@ export default class extends Generator {
         default: (answers) => toPackageName(path.basename(answers.source)),
         filter: toPackageName,
       },
+      {
+        type: "confirm",
+        name: "git",
+        message: "Create a git repo and make the first commit?",
+        default: true,
+      },
+      {
+        type: "confirm",
+        name: "github",
+        message: "Also create a GitHub repo and push to it?",
+        default: true,
+        when: (answers) => answers.git,
+      },
+      {
+        type: "confirm",
+        name: "public",
+        message: "Make the GitHub repo public?",
+        default: true,
+        when: (answers) => answers.github,
+      },
     ]);
   }
 
@@ -232,8 +252,35 @@ loadData();
   }
 
   end() {
+    if (this.answers.git) this._setupGit();
     this.log(
       `\nDone! Run "npm run dev" to start working on ${this.answers.name}.`,
     );
+  }
+    _setupGit() {
+    const run = (cmd, args) => this.spawnSync(cmd, args, { stdio: "inherit" });
+
+    try {
+      run("git", ["init", "-b", "master"]);
+      run("git", ["add", "-A"]);
+      run("git", ["commit", "-m", "Initial commit"]);
+    } catch {
+      this.log("Git setup failed. You can run git init yourself.");
+      return;
+    }
+
+    if (!this.answers.github) return;
+
+    try {
+      run("gh", [
+        "repo", "create", this.answers.name,
+        this.answers.public ? "--public" : "--private",
+        "--source", ".",
+        "--remote", "origin",
+        "--push",
+      ]);
+    } catch {
+      this.log('Could not create the GitHub repo. Is GitHub CLI installed and logged in? (gh auth login)');
+    }
   }
 }
