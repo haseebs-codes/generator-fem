@@ -13,6 +13,80 @@ const toPackageName = (str) =>
 // Windows "Copy as path" wraps the path in quotes, so strip them
 const cleanPath = (str) => str.trim().replace(/^["']|["']$/g, "");
 
+//? Reads style-guide.md and returns { colors, fonts, bodySize }
+function parseStyleGuide(markdown) {
+  const colors = {};
+  const fonts = [];
+  let bodySize = null;
+
+  let section = '';
+  let group = 'color';
+
+  for (const line of markdown.split(/\r?\n/)) {
+    const heading = line.match(/^(#{2,3})\s+(.+)/);
+    if (heading) {
+      if (heading[1] === '##') {
+        section = toPackageName(heading[2]);
+        group = 'color';
+      } else if (section === 'colors') {
+        group = toPackageName(heading[2]);
+      }
+      continue;
+    }
+
+    if (section === 'colors') {
+      const color = line.match(/^-\s*([^:]+):\s*((?:hsla?|rgba?)\([^)]*\)|#[0-9a-f]{3,8})/i);
+      if (color) {
+        const name = toPackageName(color[1].replace(/\(.*?\)/g, ''));
+        colors[group] ??= {};
+        colors[group][name] = color[2];
+      }
+    }
+
+    if (section === 'typography') {
+      const family = line.match(/^-\s*Family:\s*(.+)/i);
+      if (family) {
+        const name = family[1].replace(/\[([^\]]+)\]\(.*?\)/, '$1').trim();
+        fonts.push({ name, weights: [] });
+      }
+
+      const weights = line.match(/^-\s*Weights?:\s*(.+)/i);
+      if (weights && fonts.length) {
+        fonts.at(-1).weights = weights[1].match(/\d{3}/g) ?? [];
+      }
+
+      const size = line.match(/^-\s*Font size[^:]*:\s*(\d+(?:\.\d+)?)px/i);
+      if (size && !bodySize) {
+        bodySize = `${Number(size[1]) / 16}rem`;
+      }
+    }
+  }
+
+  return { colors, fonts, bodySize };
+}
+//? Turns the parsed data into the text that goes inside the Sass maps
+function toScss({ colors, fonts, bodySize }) {
+  const colorsMap = Object.entries(colors)
+    .map(([group, shades]) => {
+      const lines = Object.entries(shades)
+        .map(([key, value]) => `    '${key}': ${value},`)
+        .join('\n');
+      return `  ${group}: (\n${lines}\n  ),`;
+    })
+    .join('\n');
+
+  const fontNames = ['main', 'secondary', 'tertiary'];
+  const fontFamilies = fonts
+    .map((font, i) => {
+      const fallback = /serif/i.test(font.name) && !/sans/i.test(font.name) ? 'serif' : 'sans-serif';
+      return `    '${fontNames[i] ?? `font-${i + 1}`}': ('${font.name}', ${fallback}),`;
+    })
+    .join('\n');
+
+  return { colorsMap, fontFamilies, bodySize: bodySize ?? '1rem' };
+}
+
+
 export default class extends Generator {
   initializing() {
     this.log("Welcome to Front-End Mentor Generator");
