@@ -1,0 +1,89 @@
+
+
+$colors: (
+  primary: (
+    'base' : hsl(0, 0%, 20%),
+    'accent' : hsl(0, 0%, 40%)
+  ),
+  neutral: (
+    'dark': hsl(0, 0%, 10%),
+    'light': hsl(0, 0%, 90%),
+    'white': hsl(0, 0%, 100%),
+  ),
+  error: (
+    'bg' : hsl(5, 100%, 95%),
+    'text': hsl(4, 100%, 67%),
+  )
+);
+
+$font: (
+  font-family: (
+    'main': (system-ui, sans-serif),
+  ),
+  font-size: (
+    'x-small': 0.6875rem,
+    'small': 0.75rem,
+    'base': 1rem,
+    'large': 1.125rem,
+    'x-large': 1.25rem,
+    '2x-large': 1.5rem,
+    '3x-large': 1.875rem,
+    '4x-large': 2rem
+  ),
+  font-weight: (
+    "thin":100,
+    "x-light":200,
+    "light": 300,
+    "regular": 400,
+    "medium": 500,
+    "semibold": 600,
+    "bold": 700,
+    "x-bold": 800,
+    "2x-bold": 900
+  )
+);
+
+$sizes: (
+  padding: (
+    "x-small": 0.25em,
+    "small": 0.5em,
+    "base": 1em,
+    "large": 1.5em,
+    "x-large": 2em,
+    "2x-large": 2.5em
+  ),
+  margin: (
+    "x-small": 0.25rem,
+    "small": 0.5rem,
+    "base": 1rem,
+    "large": 1.5rem,
+    "x-large": 2rem,
+    "2x-large": 2.5rem
+  ),
+  radius: (
+    "small": 8px,
+    "base": 12px,
+    "large": 16px,
+    "x-large": 20px,
+    "2x-large": 28px,
+    "full": 50%
+  )
+);
+
+$base-shadow: -0.2em 0.8em 2em var(--primary-accent);
+$base-border-thickness: 0.06rem;
+
+
+// Loop through the colors map and generate text and bg colors //
+@each $group, $shades in $colors {
+  @each $key, $val in $shades {
+    .text-#{$key} {
+      color: $val;
+    }
+
+    .bg-#{$key} {
+      background-color: $val;
+    }
+  }
+}
+

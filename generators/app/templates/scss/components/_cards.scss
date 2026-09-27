@@ -1,0 +1,25 @@
+@use '../variables' as *;
+@use '../functions' as *;
+@use '../components/buttons' as *;
+
+@mixin card {
+  background-color: var(--neutral-white);
+  border-radius: var(--radius-large);
+  padding: var(--padding-base) var(--padding-large);
+  & .title {
+    color: var(--neutral-dark);
+    margin-block-end: var(--margin-base);
+  }
+  & .description {
+    font-weight: var(--font-weight-regular);
+    color: var(--neutral-dark);
+
+    & span {
+      font-weight: var(--font-weight-bold);
+    }
+  }
+}
+
+.card{
+  @include card()
+}

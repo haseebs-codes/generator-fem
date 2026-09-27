@@ -59,9 +59,6 @@ export default class extends Generator {
       scripts: {
         dev: "gulp",
       },
-      dependencies: {
-        geist: "^1.7.2",
-      },
       devDependencies: {
         gulp: "^5.0.1",
         "gulp-purgecss": "^8.0.0",
@@ -71,16 +68,16 @@ export default class extends Generator {
       },
     });
 
-    // 3. Your gulpfile (from templates/)
+    // 3. gulpfile (from templates/)
     this.fs.copy(
       this.templatePath("gulpfile.js"),
       this.destinationPath("gulpfile.js"),
     );
 
-    // 4. Starting SCSS file, in the folder your gulpfile reads from
-    this.fs.write(
-      this.destinationPath("assets/styles/scss/main.scss"),
-      `// ${this.answers.name}\n`,
+    // 4. SCSS starter files (from templates/scss)
+    this.fs.copy(
+      this.templatePath("scss"),
+      this.destinationPath("assets/styles/scss"),
     );
 
     // 5. If the challenge has a data.json, add a JS file that already fetches it

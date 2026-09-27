@@ -1,0 +1,23 @@
+@use 'sass:map';
+
+$breakpoints: (
+  mobile: 24rem,
+  tablet: 48rem,
+  desktop: 64rem
+);
+
+
+@function get-breakpoint ($breakpoint) {
+  @return map.get($breakpoints , $breakpoint);
+}
+
+@mixin respond($breakpoint) {
+  @if map.has-key($breakpoints , $breakpoint) {
+    @media (width >= get-breakpoint($breakpoint)) {
+      @content;
+    }
+  } @else {
+    @warn "Wrong breakpoint `#{$breakpoint}`";
+  }
+    
+}

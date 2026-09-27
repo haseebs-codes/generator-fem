@@ -1,0 +1,34 @@
+@use 'sass:map';
+
+$utilities: (
+  display: (
+    "prefix": "display",
+    "values": (
+      "n": none,
+      "b": block,
+      "f": flex,
+      "g": grid,
+      "i": inline,
+      "i-b": inline-block,
+    ),
+  )
+);
+
+
+// Generate Utility Classes //
+@each $property, $map in $utilities {
+  $prefix: map.get($map, "prefix");
+  $values: map.get($map, "values");
+
+  @each $k, $v in $values {
+    @if($k == "default") {
+      .#{$prefix} {
+        #{$property}: $v;
+      }
+    } @else {
+      .#{$prefix}-#{$k}{
+        #{$property}: $v;
+      }
+    }
+  }
+}
