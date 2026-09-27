@@ -114,15 +114,29 @@ export default class extends Generator {
 
   writing() {
     const source = path.resolve(this.answers.source);
-    const sourceGlob = source.replace(/\\/g, "/"); // globs need forward slashes on Windows
+    const sourceGlob = source.replace(/\\/g, "/"); //? globs need forward slashes on Windows
 
     //? 1. Copy everything from the Frontend Mentor folder
     this.fs.copy(`${sourceGlob}/**/*`, this.destinationPath(), {
       globOptions: {
         dot: true,
-        ignore: ["**/node_modules/**", "**/.git/**", "**/package-lock.json"],
+        ignore: [
+          "**/node_modules/**",
+           "**/.git/**",
+            "**/package-lock.json",
+            "**/README.md",
+            "**/AGENTS.md",
+            "**/CLAUDE.md",
+            "**/README-template.md",
+          ],
       },
     });
+
+    //? Use README-template.md as the project's README.md
+    const readmeTemplate = path.join(source, "README-template.md");
+    if (fs.existsSync(readmeTemplate)) {
+      this.fs.copy(readmeTemplate, this.destinationPath("README.md"));
+    }
 
     //? 2. package.json
     this.fs.writeJSON(this.destinationPath("package.json"), {
