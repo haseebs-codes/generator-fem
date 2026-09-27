@@ -3,11 +3,11 @@
 @use '../components/buttons' as *;
 
 @mixin card {
-  background-color: var(--neutral-white);
+  background-color: white;
   border-radius: var(--radius-large);
   padding: var(--padding-base) var(--padding-large);
   & .title {
-    color: var(--neutral-dark);
+    color: black;
     margin-block-end: var(--margin-base);
   }
   & .description {

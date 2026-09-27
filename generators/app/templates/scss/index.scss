@@ -3,7 +3,7 @@
 @use "./utilities" as *;
 @use "./base" as *;
 @use "./functions" as *;
-@use "../scss/components/buttons" as *;
+@use "./components/buttons" as *;
 
 footer {
   margin-block-start: var(--margin-small);
@@ -12,6 +12,6 @@ footer {
   color: var(--neutral-white);
 
   & a {
-    color: var(--primary-blue);
+    color: var(--neutral-white);
   }
 }
