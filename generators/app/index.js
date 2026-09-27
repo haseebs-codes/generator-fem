@@ -116,7 +116,7 @@ export default class extends Generator {
     const source = path.resolve(this.answers.source);
     const sourceGlob = source.replace(/\\/g, "/"); // globs need forward slashes on Windows
 
-    // 1. Copy everything from the Frontend Mentor folder
+    //? 1. Copy everything from the Frontend Mentor folder
     this.fs.copy(`${sourceGlob}/**/*`, this.destinationPath(), {
       globOptions: {
         dot: true,
@@ -124,7 +124,7 @@ export default class extends Generator {
       },
     });
 
-    // 2. package.json
+    //? 2. package.json
     this.fs.writeJSON(this.destinationPath("package.json"), {
       name: this.answers.name,
       version: "1.0.0",
@@ -142,19 +142,39 @@ export default class extends Generator {
       },
     });
 
-    // 3. gulpfile (from templates/)
+    //? 3. gulpfile (from templates/)
     this.fs.copy(
       this.templatePath("gulpfile.js"),
       this.destinationPath("gulpfile.js"),
     );
 
-    // 4. SCSS starter files (from templates/scss)
+    //? 4. SCSS starter files (from templates/scss)
     this.fs.copy(
       this.templatePath("scss"),
       this.destinationPath("assets/styles/scss"),
     );
 
-    // 5. If the challenge has a data.json, add a JS file that already fetches it
+    //? 4b. Fill _variables.scss from style-guide.md
+    const guidePath = path.join(source, 'style-guide.md');
+    const guide = fs.existsSync(guidePath)
+      ? parseStyleGuide(fs.readFileSync(guidePath, 'utf8'))
+      : { colors: {}, fonts: [], bodySize: null };
+
+    //? No style guide or no colors found → use placeholders so Sass still compiles
+    if (!Object.keys(guide.colors).length) {
+      guide.colors = { neutral: { dark: 'hsl(0, 0%, 10%)', white: 'hsl(0, 0%, 100%)' } };
+    }
+    if (!guide.fonts.length) {
+      guide.fonts = [{ name: 'system-ui', weights: [] }];
+    }
+
+    this.fs.copyTpl(
+      this.templatePath('scss/_variables.scss'),
+      this.destinationPath('assets/styles/scss/_variables.scss'),
+      toScss(guide),
+    );
+
+    //? 5. If the challenge has a data.json, add a JS file that already fetches it
     if (fs.existsSync(path.join(source, "data.json"))) {
       this.fs.write(
         this.destinationPath("assets/js/main.js"),
@@ -169,7 +189,7 @@ loadData();
       );
     }
 
-    // 6. Link the CSS (and JS, if there's a data.json) in index.html
+    //? 6. Link the CSS (and JS, if there's a data.json) in index.html
     const indexPath = this.destinationPath("index.html");
 
     if (this.fs.exists(indexPath)) {
