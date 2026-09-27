@@ -1,15 +1,7 @@
 
 
 $colors: (
-  primary: (
-    'base' : hsl(0, 0%, 20%),
-    'accent' : hsl(0, 0%, 40%)
-  ),
-  neutral: (
-    'dark': hsl(0, 0%, 10%),
-    'light': hsl(0, 0%, 90%),
-    'white': hsl(0, 0%, 100%),
-  ),
+  <%- colorsMap %>
   error: (
     'bg' : hsl(5, 100%, 95%),
     'text': hsl(4, 100%, 67%),
@@ -18,7 +10,7 @@ $colors: (
 
 $font: (
   font-family: (
-    'main': (system-ui, sans-serif),
+    <%- fontFamilies %>
   ),
   font-size: (
     'x-small': 0.6875rem,

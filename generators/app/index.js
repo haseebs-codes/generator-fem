@@ -152,6 +152,7 @@ export default class extends Generator {
     this.fs.copy(
       this.templatePath("scss"),
       this.destinationPath("assets/styles/scss"),
+      {globOptions: { ignore: ["**/*.ejs"] } },
     );
 
     //? 4b. Fill _variables.scss from style-guide.md
@@ -169,7 +170,7 @@ export default class extends Generator {
     }
 
     this.fs.copyTpl(
-      this.templatePath('scss/_variables.scss'),
+      this.templatePath('scss/_variables.scss.ejs'),
       this.destinationPath('assets/styles/scss/_variables.scss'),
       toScss(guide),
     );
