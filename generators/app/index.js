@@ -111,7 +111,6 @@ export default class extends Generator {
         name: "name",
         message: "Project name:",
         default: (answers) => toPackageName(path.basename(answers.source)),
-        filter: toPackageName,
         validate: (input) =>
           !fs.existsSync(path.resolve(toPackageName(input))) ||
           "A folder with that name already exists here",
@@ -171,7 +170,7 @@ export default class extends Generator {
 
     //? 2. package.json
     this.fs.writeJSON(this.destinationPath("package.json"), {
-      name: this.answers.name,
+      name: toPackageName(this.answers.name),
       version: "1.0.0",
       private: true,
       type: "module",
@@ -313,8 +312,8 @@ loadData();
       run("gh", [
         "repo",
         "create",
-        this.answers.name,
-        this.answers.public ? "--public" : "--private",
+        toPackageName(this.answers.name),
+        toPackageName(this.answers.public) ? "--public" : "--private",
         "--source",
         ".",
         "--remote",
