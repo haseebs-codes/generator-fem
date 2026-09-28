@@ -19,34 +19,36 @@ function parseStyleGuide(markdown) {
   const fonts = [];
   let bodySize = null;
 
-  let section = '';
-  let group = 'color';
+  let section = "";
+  let group = "color";
 
   for (const line of markdown.split(/\r?\n/)) {
     const heading = line.match(/^(#{2,3})\s+(.+)/);
     if (heading) {
-      if (heading[1] === '##') {
+      if (heading[1] === "##") {
         section = toPackageName(heading[2]);
-        group = 'color';
-      } else if (section === 'colors') {
+        group = "color";
+      } else if (section === "colors") {
         group = toPackageName(heading[2]);
       }
       continue;
     }
 
-    if (section === 'colors') {
-      const color = line.match(/^-\s*([^:]+):\s*((?:hsla?|rgba?)\([^)]*\)|#[0-9a-f]{3,8})/i);
+    if (section === "colors") {
+      const color = line.match(
+        /^-\s*([^:]+):\s*((?:hsla?|rgba?)\([^)]*\)|#[0-9a-f]{3,8})/i,
+      );
       if (color) {
-        const name = toPackageName(color[1].replace(/\(.*?\)/g, ''));
+        const name = toPackageName(color[1].replace(/\(.*?\)/g, ""));
         colors[group] ??= {};
         colors[group][name] = color[2];
       }
     }
 
-    if (section === 'typography') {
+    if (section === "typography") {
       const family = line.match(/^-\s*Family:\s*(.+)/i);
       if (family) {
-        const name = family[1].replace(/\[([^\]]+)\]\(.*?\)/, '$1').trim();
+        const name = family[1].replace(/\[([^\]]+)\]\(.*?\)/, "$1").trim();
         fonts.push({ name, weights: [] });
       }
 
@@ -70,22 +72,24 @@ function toScss({ colors, fonts, bodySize }) {
     .map(([group, shades]) => {
       const lines = Object.entries(shades)
         .map(([key, value]) => `    '${key}': ${value},`)
-        .join('\n');
+        .join("\n");
       return `  ${group}: (\n${lines}\n  ),`;
     })
-    .join('\n');
+    .join("\n");
 
-  const fontNames = ['main', 'secondary', 'tertiary'];
+  const fontNames = ["main", "secondary", "tertiary"];
   const fontFamilies = fonts
     .map((font, i) => {
-      const fallback = /serif/i.test(font.name) && !/sans/i.test(font.name) ? 'serif' : 'sans-serif';
+      const fallback =
+        /serif/i.test(font.name) && !/sans/i.test(font.name)
+          ? "serif"
+          : "sans-serif";
       return `    '${fontNames[i] ?? `font-${i + 1}`}': ('${font.name}', ${fallback}),`;
     })
-    .join('\n');
+    .join("\n");
 
-  return { colorsMap, fontFamilies, bodySize: bodySize ?? '1rem' };
+  return { colorsMap, fontFamilies, bodySize: bodySize ?? "1rem" };
 }
-
 
 export default class extends Generator {
   initializing() {
@@ -142,13 +146,13 @@ export default class extends Generator {
         dot: true,
         ignore: [
           "**/node_modules/**",
-           "**/.git/**",
-            "**/package-lock.json",
-            "**/README.md",
-            "**/AGENTS.md",
-            "**/CLAUDE.md",
-            "**/README-template.md",
-          ],
+          "**/.git/**",
+          "**/package-lock.json",
+          "**/README.md",
+          "**/AGENTS.md",
+          "**/CLAUDE.md",
+          "**/README-template.md",
+        ],
       },
     });
 
@@ -186,26 +190,28 @@ export default class extends Generator {
     this.fs.copy(
       this.templatePath("scss"),
       this.destinationPath("assets/styles/scss"),
-      {globOptions: { ignore: ["**/*.ejs"] } },
+      { globOptions: { ignore: ["**/*.ejs"] } },
     );
 
     //? 4b. Fill _variables.scss from style-guide.md
-    const guidePath = path.join(source, 'style-guide.md');
+    const guidePath = path.join(source, "style-guide.md");
     const guide = fs.existsSync(guidePath)
-      ? parseStyleGuide(fs.readFileSync(guidePath, 'utf8'))
+      ? parseStyleGuide(fs.readFileSync(guidePath, "utf8"))
       : { colors: {}, fonts: [], bodySize: null };
 
     //? No style guide or no colors found → use placeholders so Sass still compiles
     if (!Object.keys(guide.colors).length) {
-      guide.colors = { neutral: { dark: 'hsl(0, 0%, 10%)', white: 'hsl(0, 0%, 100%)' } };
+      guide.colors = {
+        neutral: { dark: "hsl(0, 0%, 10%)", white: "hsl(0, 0%, 100%)" },
+      };
     }
     if (!guide.fonts.length) {
-      guide.fonts = [{ name: 'system-ui', weights: [] }];
+      guide.fonts = [{ name: "system-ui", weights: [] }];
     }
 
     this.fs.copyTpl(
-      this.templatePath('scss/_variables.scss.ejs'),
-      this.destinationPath('assets/styles/scss/_variables.scss'),
+      this.templatePath("scss/_variables.scss.ejs"),
+      this.destinationPath("assets/styles/scss/_variables.scss"),
       toScss(guide),
     );
 
@@ -229,6 +235,26 @@ loadData();
 
     if (this.fs.exists(indexPath)) {
       let html = this.fs.read(indexPath);
+
+      //? 6a. Move the starter <style> block into index.scss
+      const styleBlock = html.match(
+        /\n?[ \t]*(?:<!--.*?-->\s*)?<style>([\s\S]*?)<\/style>/,
+      );
+
+      if (styleBlock) {
+        html = html.replace(styleBlock[0], "");
+
+        const css = styleBlock[1]
+          .split(/\r?\n/)
+          .map((line) => line.trim())
+          .filter(Boolean)
+          .join("\n");
+
+        this.fs.append(
+          this.destinationPath("assets/styles/scss/index.scss"),
+          `\n// Frontend Mentor attribution\n${css}\n`,
+        );
+      }
 
       if (!html.includes("assets/styles/css/index.css")) {
         html = html.replace(
@@ -257,7 +283,7 @@ loadData();
       `\nDone! Run "npm run dev" to start working on ${this.answers.name}.`,
     );
   }
-    _setupGit() {
+  _setupGit() {
     const run = (cmd, args) => this.spawnSync(cmd, args, { stdio: "inherit" });
 
     try {
@@ -273,14 +299,20 @@ loadData();
 
     try {
       run("gh", [
-        "repo", "create", this.answers.name,
+        "repo",
+        "create",
+        this.answers.name,
         this.answers.public ? "--public" : "--private",
-        "--source", ".",
-        "--remote", "origin",
+        "--source",
+        ".",
+        "--remote",
+        "origin",
         "--push",
       ]);
     } catch {
-      this.log('Could not create the GitHub repo. Is GitHub CLI installed and logged in? (gh auth login)');
+      this.log(
+        "Could not create the GitHub repo. Is GitHub CLI installed and logged in? (gh auth login)",
+      );
     }
   }
 }

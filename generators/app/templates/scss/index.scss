@@ -4,14 +4,3 @@
 @use "./base" as *;
 @use "./functions" as *;
 @use "./components/buttons" as *;
-
-footer {
-  margin-block-start: var(--margin-small);
-  font-size: var(--font-size-x-small);
-  text-align: center;
-  color: black;
-
-  & a {
-    color: black;
-  }
-}
