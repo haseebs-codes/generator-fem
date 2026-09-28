@@ -112,6 +112,9 @@ export default class extends Generator {
         message: "Project name:",
         default: (answers) => toPackageName(path.basename(answers.source)),
         filter: toPackageName,
+        validate: (input) =>
+          !fs.existsSync(path.resolve(toPackageName(input))) ||
+          "A folder with that name already exists here",
       },
       {
         type: "confirm",
@@ -134,6 +137,10 @@ export default class extends Generator {
         when: (answers) => answers.github,
       },
     ]);
+  }
+
+  async configuring() {
+    this.destinationRoot(this.destinationPath(this.answers.name));
   }
 
   writing() {
@@ -277,10 +284,15 @@ loadData();
     }
   }
 
+  install() {
+    if (this.options.skipInstall) return;
+    this.spawnSync("npm", ["install"], { stdio: "inherit" });
+  }
+
   end() {
     if (this.answers.git) this._setupGit();
     this.log(
-      `\nDone! Run "npm run dev" to start working on ${this.answers.name}.`,
+      `\nDone! Run "cd ${this.answers.name}" then "npm run dev".`,
     );
   }
   _setupGit() {
