@@ -313,7 +313,7 @@ loadData();
         "repo",
         "create",
         toPackageName(this.answers.name),
-        toPackageName(this.answers.public) ? "--public" : "--private",
+        this.answers.public ? "--public" : "--private",
         "--source",
         ".",
         "--remote",
