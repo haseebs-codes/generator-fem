@@ -124,16 +124,27 @@ export default class extends Generator {
       {
         type: "confirm",
         name: "github",
-        message: "Also create a GitHub repo and push to it?",
+        message: "Also push the project to GitHub?",
         default: true,
         when: (answers) => answers.git,
       },
       {
+        type: "input",
+        name: "link",
+        message: "GitHub repo URL (leave empty to create a new repo):",
+        when: (answers) => answers.github,
+        filter: (input = "") => input.trim(),
+        validate: (input = "") =>
+          !input.trim() ||
+          /^(https:\/\/|git@)\S+$/.test(input.trim()) ||
+          "Enter an https:// or git@ URL, or leave it empty",
+      },
+      {
         type: "confirm",
         name: "public",
-        message: "Make the GitHub repo public?",
+        message: "Make the new GitHub repo public?",
         default: true,
-        when: (answers) => answers.github,
+        when: (answers) => answers.github && !answers.link,
       },
     ]);
   }
@@ -291,7 +302,7 @@ loadData();
   end() {
     if (this.answers.git) this._setupGit();
     this.log(
-      `\nDone! Run "cd ${this.answers.name}" then "npm run dev".`,
+      `\nDone! Run "cd "${this.answers.name}"" then "npm run dev".`,
     );
   }
   _setupGit() {
@@ -308,6 +319,20 @@ loadData();
 
     if (!this.answers.github) return;
 
+    //? A link was given → connect to that existing repo and push to it
+    if (this.answers.link) {
+      try {
+        run("git", ["remote", "add", "origin", this.answers.link]);
+        run("git", ["push", "-u", "origin", "master"]);
+      } catch {
+        this.log(
+          "Could not push to the GitHub repo. Check the URL, and make sure the repo is empty and you have access to it.",
+        );
+      }
+      return;
+    }
+
+    //? No link → create a new repo with GitHub CLI
     try {
       run("gh", [
         "repo",
